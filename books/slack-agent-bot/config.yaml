@@ -1,9 +1,14 @@
-title: "Slack でアプリ開発を始めよう"
-summary: "Slack を使ってアプリ開発を始める方法"
-topics: ["slack", "slackbot", "expo", "expogo", "typescript", "reactnative"]
+title: "自宅のMacをAIエージェント化！Slack × Gemini CLIで作る完全自律型モバイル開発環境"
+summary: "外出先のスマホからSlackで指示するだけで、自宅のMacがReact Native (Expo) のコードを自動改修してくれるChatOps環境の構築手順を解説する実践ガイドです。"
+topics: ["slack", "slackbot", "expo", "typescript", "reactnative"]
 published: false
-price: 0 # 有料の場合200〜5000
-# 本に含めるチャプターを順番に並べましょう
+price: 0
 chapters:
-  - example1
-  - example2
+  - 00-intro
+  - 01-architecture
+  - 02-gemini-cli
+  - 03-tailscale-expo
+  - 04-slack-traps
+  - 05-implementation
+  - 06-operation
+toc_depth: 2
