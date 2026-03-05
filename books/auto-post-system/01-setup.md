@@ -2,67 +2,94 @@
 title: "01 セットアップ — TypeScriptで自動投稿システム構築"
 ---
 
-前提:
+この章ではローカル開発環境の準備からビルド・実行まで、実務で使える手順を示します。
 
-- Node.js 20.x を利用することを想定
-- GitHub Actions を用いた自動実行
+前提
 
-手順（簡易）:
+- 推奨 Node.js バージョン: 18.x または 20.x（プロジェクトの `engines` を確認）
+- TypeScript と npm/yarn/pnpm のいずれかに慣れていること
 
-1. リポジトリをクローン
-2. Node.js をインストール
-3. 依存関係をインストール: `npm ci`
-4. ビルド: `npm run build`
-5. 動作確認: `npm start`（または `node dist/index.js`）
+1. リポジトリの取得
 
-注意点:
-
-- 開発環境での Node バージョン管理（nvm / asdf）を推奨
-- CI でのキャッシュ戦略や依存バージョン固定の方針を記載する
-
-各セクション（詳細）:
-
-- ソース構成の説明
-- 必要なツール (node, npm, git)
-- ローカルでのデバッグ方法
-- 本番へのデプロイ手順（最低限）
-
-## 本（book）を管理するための `config.yaml`
-
-Zenn CLI で本（book）を管理する際、`books/<book-slug>/config.yaml` は必須です。以下は記述例と各フィールドの説明です。
-
-例:
-
-```yaml
-title: "本のタイトル"
-summary: "本の紹介文"
-topics: ["markdown", "zenn"]
-published: true
-price: 0
-chapters:
-	- introduction
-	- setup
-	- workflows
-toc_depth: 2
+```bash
+git clone <your-repo-url>
+cd bluesky-post-bot
 ```
 
-フィールド説明:
+2. Node.js の準備（バージョン管理推奨）
 
-- `title`: 本の表示タイトル
-- `summary`: 本の紹介文（有料本でも公開されます）
-- `topics`: トピック（タグ）を最大 5 つまで指定
-- `published`: `true` で公開、`false` で下書き
-- `price`: 0（無料）または 200〜5000 の間で 100 円単位（有料の場合はプライベートリポジトリ推奨）
-- `chapters`: 表示順に並べるチャプターの slug（拡張子 `.md` は不要）
-- `toc_depth`: 目次に表示する見出しの深さ（0〜3）
+nvm を使う例:
 
-注意事項:
+```bash
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.4/install.sh | bash
+nvm install 20
+nvm use 20
+```
 
-- `chapters` に記載されていないチャプターは zenn.dev に同期されません。順序は `chapters` に依存します。
-- `price` を有料にする場合は運用方針（リポジトリの公開設定、販売ポリシー）を確認してください。
-- カバー画像は `cover.png` または `cover.jpeg` を同フォルダに置くと良いです（推奨サイズ 500x700px）。
+```bash
+asdf plugin-add nodejs https://github.com/asdf-vm/asdf-nodejs.git
+asdf install nodejs 20.0.0
+asdf global nodejs 20.0.0
+```
 
-簡単な確認手順:
+3. 依存関係のインストール
 
-- ローカルでプレビュー: `npx zenn preview` を使って表示を確認
-- 変更をコミットして GitHub にプッシュすると Zenn 側で同期が走ります
+CI と同じ再現性を得るために `package-lock.json` / `pnpm-lock.yaml` を使い、以下を実行します:
+
+```bash
+npm ci
+# または
+pnpm install --frozen-lockfile
+# または
+yarn install --frozen-lockfile
+```
+
+4. 開発用スクリプト（推奨）
+
+package.json に以下のようなスクリプトを用意しておくと運用が楽です。
+
+```json
+"scripts": {
+	"build": "tsc -p tsconfig.json",
+	"start": "node dist/index.js",
+	"dev": "ts-node-dev --respawn src/index.ts",
+	"lint": "eslint src --ext .ts",
+	"test": "jest"
+}
+```
+
+5. ビルドと実行
+
+```bash
+npm run build
+npm start
+```
+
+開発中は `npm run dev` を使って TypeScript の変更を即時反映しながら動かすと便利です。
+
+6. ローカルでの環境変数管理
+
+`.env` を使う場合は開発専用にし、実運用では秘密は Git に含めないでください。例:
+
+```
+GEMINI_API_KEY=your_gemini_api_key
+BLUESKY_TOKEN=your_bluesky_token
+POST_STORAGE_PATH=./data/posted.json
+DRY_RUN=true
+```
+
+開発時には `dotenv` を利用して読み込むか、`env` ユーティリティを用いて `process.env` を整理してください。
+
+7. CI の準備メモ（GitHub Actions）
+
+- `actions/setup-node` で Node バージョンを固定
+- `actions/cache` で npm/pnpm のキャッシュを活用
+- `npm ci` を使ってロックファイルに基づく再現性あるインストール
+
+8. 追加の注意点
+
+- ローカルと CI で同一の Node バージョンを使うこと（`.nvmrc` / `.tool-versions` をリポジトリに含める）
+- 依存関係は定期的にアップデートし、脆弱性スキャンを CI に組み込む
+- 本番実行では `DRY_RUN` を `false` に切り替えるための安全措置（手動確認や承認ワークフロー）を設ける
+
+この章の次は `Secrets と環境変数` の章で、API キーやトークンの安全な管理方法について詳述します。
