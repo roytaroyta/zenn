@@ -1,6 +1,6 @@
-title: "自動投稿システムの作り方"
-summary: "GNews + Gemini を使った自動投稿システムの作り方"
-topics: ["typescript", "githubactions"]
+title: "Gemini を使った自動投稿システムの作り方"
+summary: "Gemini を使った自動投稿システムの作り方"
+topics: ["gemini", "githubactions", "typescript", "bluesky", "bot"]
 published: false
 price: 0
 chapters:
